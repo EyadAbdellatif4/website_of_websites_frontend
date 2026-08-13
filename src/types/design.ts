@@ -1,17 +1,27 @@
-import { DesignAnalysisResult } from './analysis';
-
-export type DesignStatus = 'pending' | 'uploaded' | 'processing' | 'analyzed' | 'failed';
+export type DesignStatus =
+  | 'UPLOADED'
+  | 'PROCESSING'
+  | 'READY'
+  | 'FAILED'
+  | 'uploaded'
+  | 'processing'
+  | 'ready'
+  | 'failed';
 
 export interface Design {
   id: string;
-  user_id: string;
   name: string;
-  file_name: string;
-  storage_key: string;
-  file_size: number;
+  fileName?: string;
+  file_name?: string;
+  fileSize?: number;
+  file_size?: number;
   status: DesignStatus;
-  layout_data: DesignAnalysisResult['layout'] | null;
-  placeholders_data: DesignAnalysisResult['placeholders'] | null;
-  created_at: string;
-  updated_at: string;
+  layoutData?: Record<string, unknown> | null;
+  layout_data?: Record<string, unknown> | null;
+  placeholdersData?: Array<Record<string, unknown>> | null;
+  placeholders_data?: Array<Record<string, unknown>> | null;
+  createdAt?: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
 }

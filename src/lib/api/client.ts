@@ -15,12 +15,15 @@ export async function apiClient<T>(
 ): Promise<ApiResponse<T>> {
   const url = `${env.apiBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
+  const defaultHeaders: Record<string, string> = isFormData
+    ? {}
+    : { 'Content-Type': 'application/json' };
 
   try {
     const res = await fetch(url, {
+      credentials: 'include',
       ...options,
       headers: {
         ...defaultHeaders,
@@ -29,15 +32,15 @@ export async function apiClient<T>(
     });
 
     if (!res.ok) {
-      const errorJson = await res.json().catch(() => ({
+      const errorJson = (await res.json().catch(() => ({
         statusCode: res.status,
         message: res.statusText,
         error: 'HTTP Error',
-      }));
+      }))) as ApiResponse<T>['error'];
       return { error: errorJson };
     }
 
-    const data = await res.json().catch(() => ({} as T));
+    const data = (await res.json().catch(() => ({}))) as T;
     return { data };
   } catch (err) {
     return {

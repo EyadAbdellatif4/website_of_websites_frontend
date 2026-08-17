@@ -1,39 +1,67 @@
 'use client';
 
-import { Card } from '../ui/card';
+import React, { useState } from 'react';
 import { DesignAnalysisResult } from '../../types/analysis';
+import { LayoutVisualizer } from './layout-visualizer';
+import { SectionListView } from './section-list-view';
+import { PlaceholderListView } from './placeholder-list-view';
+import { PlaceholderDetailInspector } from './placeholder-detail-inspector';
+import { RawAnalysisDebugView } from './raw-analysis-debug-view';
 
 interface DesignAnalysisViewProps {
   analysis?: DesignAnalysisResult;
 }
 
 export function DesignAnalysisView({ analysis }: DesignAnalysisViewProps) {
-  const layout = analysis?.layout ?? { width: 1440, height: 3000, sections: [] };
+  const [selectedPlaceholderId, setSelectedPlaceholderId] = useState<string | null>(null);
+
+  const layout = analysis?.layout ?? { width: 1440, height: 2000, sections: [] };
   const placeholders = analysis?.placeholders ?? [];
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card title="Detected Layout Structure" description="Structural frame and section bounds extracted from design reference.">
-        <div className="space-y-3 text-sm text-zinc-400">
-          <div className="flex justify-between border-b border-zinc-800 pb-2">
-            <span>Canvas Dimensions:</span>
-            <span className="font-mono text-zinc-200">{layout.width}px × {layout.height}px</span>
-          </div>
-          <div className="flex justify-between border-b border-zinc-800 pb-2">
-            <span>Detected Sections:</span>
-            <span className="font-mono text-zinc-200">{layout.sections.length}</span>
-          </div>
-        </div>
-      </Card>
+  const selectedPlaceholder =
+    placeholders.find((p) => p.id === selectedPlaceholderId) || null;
 
-      <Card title="Extracted Placeholders" description="Dynamic content slots pending user custom text, assets, and images.">
-        <div className="space-y-3 text-sm text-zinc-400">
-          <div className="flex justify-between border-b border-zinc-800 pb-2">
-            <span>Total Placeholders:</span>
-            <span className="font-mono text-zinc-200">{placeholders.length}</span>
-          </div>
+  return (
+    <div className="space-y-8">
+      {/* Layout Canvas */}
+      <section className="space-y-2">
+        <h2 className="text-base font-semibold text-white">Visual Layout & Bounding Boxes</h2>
+        <LayoutVisualizer
+          layout={layout}
+          placeholders={placeholders}
+          selectedPlaceholderId={selectedPlaceholderId}
+          onSelectPlaceholder={setSelectedPlaceholderId}
+        />
+      </section>
+
+      {/* Placeholders & Sections Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="lg:col-span-2 space-y-8">
+          <PlaceholderListView
+            placeholders={placeholders}
+            selectedPlaceholderId={selectedPlaceholderId}
+            onSelectPlaceholder={setSelectedPlaceholderId}
+          />
+
+          <SectionListView
+            sections={layout.sections}
+            placeholders={placeholders}
+          />
         </div>
-      </Card>
+
+        <div className="lg:col-span-1 sticky top-6">
+          <PlaceholderDetailInspector
+            placeholder={selectedPlaceholder}
+            onClearSelection={() => setSelectedPlaceholderId(null)}
+          />
+        </div>
+      </section>
+
+      {analysis && (
+        <section>
+          <RawAnalysisDebugView analysis={analysis} />
+        </section>
+      )}
     </div>
   );
 }

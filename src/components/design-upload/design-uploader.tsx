@@ -22,9 +22,13 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
     setError(null);
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
+      const lowerName = selected.name.toLowerCase();
 
-      if (!selected.name.toLowerCase().endsWith('.zip')) {
-        setError('Only .zip files are allowed.');
+      const isValidExtension =
+        lowerName.endsWith('.zip') || lowerName.endsWith('.svg');
+
+      if (!isValidExtension) {
+        setError('Only .zip archives or standalone .svg files are allowed.');
         setFile(null);
         return;
       }
@@ -39,7 +43,9 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
 
       // Auto-fill design name from file name if empty
       if (!name) {
-        const defaultName = selected.name.replace(/\.zip$/i, '').replace(/[-_]/g, ' ');
+        const defaultName = selected.name
+          .replace(/\.(zip|svg)$/i, '')
+          .replace(/[-_]/g, ' ');
         setName(defaultName);
       }
     }
@@ -55,7 +61,7 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
     }
 
     if (!file) {
-      setError('Please select a valid ZIP file to upload.');
+      setError('Please select a valid ZIP or SVG file to upload.');
       return;
     }
 
@@ -82,10 +88,12 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
     }
   };
 
+  const isSvg = file?.name.toLowerCase().endsWith('.svg');
+
   return (
     <Card
       title="Upload Design File"
-      description="Upload a .zip file containing your design files"
+      description="Upload a .zip archive or standalone .svg design file"
       className="max-w-xl mx-auto"
     >
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
@@ -101,7 +109,7 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
           </label>
           <input
             type="text"
-            placeholder="e.g. Portfolio Website Design"
+            placeholder="e.g. Serendale AI Blockchain Website"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={isUploading}
@@ -112,12 +120,12 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
 
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-            ZIP File
+            Design File (.ZIP or .SVG)
           </label>
           <div className="border-2 border-dashed border-zinc-800 rounded-xl p-6 text-center hover:border-zinc-700 transition bg-zinc-950/50">
             <input
               type="file"
-              accept=".zip,application/zip,application/x-zip-compressed"
+              accept=".zip,.svg,image/svg+xml,application/zip,application/x-zip-compressed"
               onChange={handleFileChange}
               disabled={isUploading}
               id="zip-file-input"
@@ -128,7 +136,7 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
               className="cursor-pointer flex flex-col items-center justify-center gap-2"
             >
               <div className="h-10 w-10 text-xl text-zinc-400 flex items-center justify-center rounded-full bg-zinc-800/60">
-                📦
+                {isSvg ? '🎨' : '📦'}
               </div>
               {file ? (
                 <div className="text-sm font-medium text-indigo-400">
@@ -137,10 +145,10 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
               ) : (
                 <>
                   <p className="text-sm font-medium text-zinc-300">
-                    Click to select a ZIP file
+                    Click to select a ZIP or SVG file
                   </p>
                   <p className="text-xs text-zinc-500">
-                    Accepts single .zip file up to 50MB
+                    Accepts single .zip or .svg file up to 50MB
                   </p>
                 </>
               )}
@@ -154,7 +162,7 @@ export function DesignUploader({ onSuccess }: DesignUploaderProps) {
           className="w-full py-2.5 font-medium"
           disabled={isUploading || !file || !name.trim()}
         >
-          {isUploading ? 'Uploading ZIP File...' : 'Upload Design'}
+          {isUploading ? 'Uploading Design File...' : 'Upload Design'}
         </Button>
       </form>
     </Card>

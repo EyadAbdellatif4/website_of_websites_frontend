@@ -49,7 +49,6 @@ export function DesignList() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchDesigns();
   }, [fetchDesigns]);
 
@@ -91,16 +90,16 @@ export function DesignList() {
         const errMsg = Array.isArray(res.error.message)
           ? res.error.message.join(', ')
           : res.error.message;
-        setActionError(`ZIP Processing failed for "${name}": ${errMsg}`);
+        setActionError(`Processing failed for "${name}": ${errMsg}`);
       } else if (res.data) {
         const s = res.data.summary;
         setActionSuccess(
-          `ZIP processed successfully for "${name}"! Extracted ${s.totalFiles} design assets.`
+          `Design processed successfully for "${name}"! Extracted ${s.totalFiles} design assets.`
         );
         await fetchDesigns();
       }
     } catch {
-      setActionError(`ZIP Processing failed for "${name}" due to a network error.`);
+      setActionError(`Processing failed for "${name}" due to a network error.`);
     } finally {
       setProcessingId(null);
     }
@@ -172,13 +171,13 @@ export function DesignList() {
         <div className="text-4xl mb-2">📁</div>
         <h3 className="text-base font-semibold text-zinc-200">No designs uploaded yet</h3>
         <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-          Upload your first design ZIP archive to extract layout, sections, and placeholders with AI.
+          Upload your first design ZIP or SVG file to extract layout, sections, and placeholders with AI.
         </p>
         <Link
           href="/designs/upload"
           className="inline-block mt-3 rounded-lg bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-lg transition hover:bg-indigo-500"
         >
-          + Upload Design ZIP
+          + Upload Design
         </Link>
       </div>
     );
@@ -254,7 +253,7 @@ export function DesignList() {
             >
               <div className="flex items-center gap-3.5">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 font-semibold text-xl border border-indigo-500/20 group-hover:scale-105 transition">
-                  📦
+                  {fileName.toLowerCase().endsWith('.svg') ? '🎨' : '📦'}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -297,7 +296,7 @@ export function DesignList() {
                     {processingId === design.id && (
                       <div className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-transparent mr-1" />
                     )}
-                    {processingId === design.id ? 'Processing...' : 'Process ZIP'}
+                    {processingId === design.id ? 'Processing...' : 'Process File'}
                   </button>
                 )}
 

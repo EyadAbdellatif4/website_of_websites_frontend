@@ -1,74 +1,23 @@
-import { apiClient, ApiResponse } from './client';
-import { env } from '../config/env';
-import { Design } from '../../types/design';
-import { DesignAnalysisResult, DesignPlaceholder } from '../../types/analysis';
+import { apiClient, ApiResponse } from '../api-client';
+import {
+  DesignAnalysisResult,
+  DesignPlaceholder,
+} from '../../types/analysis';
+import { env } from '../env';
 
-export interface AnalysisResponseData {
-  design: Design;
-  result: DesignAnalysisResult;
-}
-
-export interface PlaceholderUpdateResponseData {
-  placeholder: DesignPlaceholder;
-  totalFilled: number;
-  totalCount: number;
-}
-
-export interface GeneratedProjectManifest {
-  generationId: string;
-  designId: string;
-  userId: string;
-  designName: string;
-  generatedAt: string;
-  projectTarget: string;
-  totalFiles: number;
-  sectionsCount: number;
-  placeholdersCount: number;
-  assetsCount: number;
-  files: string[];
-}
-
-export interface GenerationResponseData {
-  success: boolean;
-  project: {
-    generationId: string;
-    designId: string;
-    designName: string;
-    status: string;
-    generatedAt: string;
-    totalFiles: number;
-    manifest: GeneratedProjectManifest;
-  };
-}
-
-export type PreviewStatusType =
-  | 'NOT_READY'
-  | 'STARTING'
-  | 'RUNNING'
-  | 'STOPPING'
-  | 'STOPPED'
-  | 'FAILED';
-
-export interface PreviewStatusResponseData {
-  designId: string;
-  status: PreviewStatusType;
-  url: string | null;
-  port: number | null;
-  startedAt: string | null;
-  errorMessage: string | null;
-  activePreviewsCount: number;
+export interface DesignDto {
+  id: string;
+  name: string;
+  fileName: string;
+  fileSize: number;
+  status: 'UPLOADED' | 'PROCESSING' | 'READY' | 'FAILED';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProcessingResponseData {
   designId: string;
-  userId: string;
-  extractedDir: string;
-  fileInventory: Array<{
-    path: string;
-    type: 'svg' | 'image' | 'font' | 'other';
-    size: number;
-    metadata: Record<string, unknown>;
-  }>;
+  status: string;
   summary: {
     totalFiles: number;
     svgCount: number;
@@ -78,30 +27,92 @@ export interface ProcessingResponseData {
   };
 }
 
+export interface AnalysisResponseData {
+  design: DesignDto;
+  result: DesignAnalysisResult;
+}
+
+export interface PlaceholderUpdateResponseData {
+  placeholder: DesignPlaceholder;
+  totalFilled: number;
+  totalCount: number;
+}
+
+export interface GeneratedProjectFile {
+  path: string;
+  size: number;
+  type: 'code' | 'asset' | 'config';
+}
+
+export interface GeneratedProjectManifest {
+  designId: string;
+  generationId: string;
+  projectPath: string;
+  framework: string;
+  language: string;
+  styling: string;
+  generatedAt: string;
+  files: GeneratedProjectFile[];
+  summary: {
+    totalFiles: number;
+    sectionsCount: number;
+    assetsCount: number;
+  };
+}
+
+export interface GenerationResponseData {
+  design: DesignDto;
+  manifest: GeneratedProjectManifest;
+  instructions: {
+    unzipCommand: string;
+    installCommand: string;
+    devCommand: string;
+  };
+}
+
+export interface PreviewStatusResponseData {
+  designId: string;
+  status: 'NOT_READY' | 'STARTING' | 'RUNNING' | 'STOPPING' | 'STOPPED' | 'FAILED';
+  port: number | null;
+  url: string | null;
+  startedAt: string | null;
+  error?: string | null;
+}
+
 export const designsApi = {
-  uploadDesign: (file: File, name: string): Promise<ApiResponse<Design>> => {
+  getDesigns: (): Promise<ApiResponse<DesignDto[]>> =>
+    apiClient<DesignDto[]>('/designs'),
+
+  getDesign: (id: string): Promise<ApiResponse<DesignDto>> =>
+    apiClient<DesignDto>(`/designs/${id}`),
+
+  uploadDesign: (
+    file: File,
+    name: string,
+  ): Promise<ApiResponse<DesignDto>> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('name', name);
 
-    return apiClient<Design>('/designs/upload', {
+    return apiClient<DesignDto>('/designs/upload', {
       method: 'POST',
       body: formData,
     });
   },
-
-  getDesigns: (): Promise<ApiResponse<Design[]>> =>
-    apiClient<Design[]>('/designs'),
-
-  getDesignById: (id: string): Promise<ApiResponse<Design>> =>
-    apiClient<Design>(`/designs/${id}`),
 
   deleteDesign: (id: string): Promise<ApiResponse<{ message: string }>> =>
     apiClient<{ message: string }>(`/designs/${id}`, {
       method: 'DELETE',
     }),
 
-  processDesign: (id: string): Promise<ApiResponse<ProcessingResponseData>> =>
+  getProcessingResult: (
+    id: string,
+  ): Promise<ApiResponse<ProcessingResponseData>> =>
+    apiClient<ProcessingResponseData>(`/designs/${id}/processing`),
+
+  processDesign: (
+    id: string,
+  ): Promise<ApiResponse<ProcessingResponseData>> =>
     apiClient<ProcessingResponseData>(`/designs/${id}/process`, {
       method: 'POST',
     }),

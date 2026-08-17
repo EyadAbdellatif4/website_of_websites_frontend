@@ -1,9 +1,9 @@
-import { apiClient, ApiResponse } from '../api-client';
+import { apiClient, ApiResponse } from './client';
 import {
   DesignAnalysisResult,
   DesignPlaceholder,
 } from '../../types/analysis';
-import { env } from '../env';
+import { env } from '../config/env';
 
 export interface DesignDto {
   id: string;

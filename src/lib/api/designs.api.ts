@@ -8,11 +8,19 @@ import { env } from '../config/env';
 export interface DesignDto {
   id: string;
   name: string;
-  fileName: string;
-  fileSize: number;
-  status: 'UPLOADED' | 'PROCESSING' | 'READY' | 'FAILED';
-  createdAt: string;
-  updatedAt: string;
+  fileName?: string;
+  file_name?: string;
+  fileSize?: number;
+  file_size?: number;
+  status: 'UPLOADED' | 'PROCESSING' | 'READY' | 'FAILED' | 'uploaded' | 'processing' | 'ready' | 'failed';
+  layoutData?: Record<string, unknown> | null;
+  layout_data?: Record<string, unknown> | null;
+  placeholdersData?: Array<Record<string, unknown>> | null;
+  placeholders_data?: Array<Record<string, unknown>> | null;
+  createdAt?: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
 }
 
 export interface ProcessingResponseData {
@@ -52,17 +60,26 @@ export interface GeneratedProjectManifest {
   language: string;
   styling: string;
   generatedAt: string;
-  files: GeneratedProjectFile[];
+  files: Array<GeneratedProjectFile | string>;
   summary: {
     totalFiles: number;
     sectionsCount: number;
+    placeholdersCount?: number;
     assetsCount: number;
+  };
+  manifest?: {
+    totalFiles: number;
+    sectionsCount: number;
+    placeholdersCount?: number;
+    assetsCount: number;
+    files: string[];
   };
 }
 
 export interface GenerationResponseData {
   design: DesignDto;
   manifest: GeneratedProjectManifest;
+  project?: GeneratedProjectManifest;
   instructions: {
     unzipCommand: string;
     installCommand: string;
@@ -84,6 +101,9 @@ export const designsApi = {
     apiClient<DesignDto[]>('/designs'),
 
   getDesign: (id: string): Promise<ApiResponse<DesignDto>> =>
+    apiClient<DesignDto>(`/designs/${id}`),
+
+  getDesignById: (id: string): Promise<ApiResponse<DesignDto>> =>
     apiClient<DesignDto>(`/designs/${id}`),
 
   uploadDesign: (

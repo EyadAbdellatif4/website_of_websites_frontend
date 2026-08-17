@@ -52,8 +52,9 @@ export function GenerationModal({
               ? res.error.message.join(', ')
               : res.error.message;
             setError(msg || 'Failed to generate website codebase');
-          } else if (res.data?.project) {
-            setGenerationData(res.data.project);
+          } else if (res.data) {
+            const projectData = res.data.manifest || res.data.project;
+            setGenerationData(projectData || null);
           }
         })
         .catch(() => {
@@ -170,7 +171,7 @@ export function GenerationModal({
             <div className="grid grid-cols-4 gap-3 text-center">
               <div className="rounded-xl bg-zinc-900/60 p-3 border border-zinc-800">
                 <div className="text-xl font-extrabold text-white">
-                  {generationData.manifest.totalFiles}
+                  {generationData.summary?.totalFiles ?? generationData.manifest?.totalFiles ?? generationData.files?.length ?? 0}
                 </div>
                 <div className="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">
                   Files Created
@@ -178,7 +179,7 @@ export function GenerationModal({
               </div>
               <div className="rounded-xl bg-zinc-900/60 p-3 border border-zinc-800">
                 <div className="text-xl font-extrabold text-indigo-400">
-                  {generationData.manifest.sectionsCount}
+                  {generationData.summary?.sectionsCount ?? generationData.manifest?.sectionsCount ?? 0}
                 </div>
                 <div className="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">
                   Sections
@@ -186,7 +187,7 @@ export function GenerationModal({
               </div>
               <div className="rounded-xl bg-zinc-900/60 p-3 border border-zinc-800">
                 <div className="text-xl font-extrabold text-cyan-400">
-                  {generationData.manifest.placeholdersCount}
+                  {generationData.summary?.placeholdersCount ?? generationData.manifest?.placeholdersCount ?? 0}
                 </div>
                 <div className="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">
                   Placeholders
@@ -194,7 +195,7 @@ export function GenerationModal({
               </div>
               <div className="rounded-xl bg-zinc-900/60 p-3 border border-zinc-800">
                 <div className="text-xl font-extrabold text-emerald-400">
-                  {generationData.manifest.assetsCount}
+                  {generationData.summary?.assetsCount ?? generationData.manifest?.assetsCount ?? 0}
                 </div>
                 <div className="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5">
                   Assets Bundled
@@ -206,12 +207,15 @@ export function GenerationModal({
             <div className="space-y-1.5">
               <div className="text-xs font-semibold text-zinc-300">Generated File Structure:</div>
               <div className="max-h-36 overflow-y-auto rounded-lg bg-zinc-900/80 p-3 font-mono text-[11px] text-zinc-400 border border-zinc-800 space-y-1">
-                {generationData.manifest.files.map((filePath) => (
-                  <div key={filePath} className="flex items-center gap-1.5">
-                    <span className="text-indigo-400">📄</span>
-                    <span className="text-zinc-200">{filePath}</span>
-                  </div>
-                ))}
+                {(generationData.files || []).map((fileItem, idx) => {
+                  const filePath = typeof fileItem === 'string' ? fileItem : fileItem.path;
+                  return (
+                    <div key={filePath || idx} className="flex items-center gap-1.5">
+                      <span className="text-indigo-400">📄</span>
+                      <span className="text-zinc-200">{filePath}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

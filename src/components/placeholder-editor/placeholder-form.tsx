@@ -9,6 +9,7 @@ import {
 } from '../../types/analysis';
 import { designsApi } from '../../lib/api/designs.api';
 import { isUrlSafe } from '../../lib/utils/url.util';
+import { ConfirmModal } from '../ui/confirm-modal';
 
 interface PlaceholderFormProps {
   placeholder: DesignPlaceholder | null;
@@ -34,6 +35,7 @@ export function PlaceholderForm({
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -228,11 +230,7 @@ export function PlaceholderForm({
     }
   };
 
-  const handleClearValue = async () => {
-    if (!confirm(`Are you sure you want to clear content for "${placeholder.role}"?`)) {
-      return;
-    }
-
+  const executeClearValue = async () => {
     setErrorMsg(null);
     setSuccessMsg(null);
     setIsClearing(true);
@@ -252,6 +250,7 @@ export function PlaceholderForm({
         setLinkUrl('');
         setIsDirty(false);
         onPlaceholderUpdated(res.data.placeholder);
+        setShowClearConfirm(false);
       }
     } catch {
       setErrorMsg('Network error while clearing placeholder.');
@@ -377,7 +376,7 @@ export function PlaceholderForm({
               {hasValue ? (
                 <button
                   type="button"
-                  onClick={handleClearValue}
+                  onClick={() => setShowClearConfirm(true)}
                   disabled={isClearing || isSaving}
                   className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
                 >
@@ -441,7 +440,7 @@ export function PlaceholderForm({
               {hasValue ? (
                 <button
                   type="button"
-                  onClick={handleClearValue}
+                  onClick={() => setShowClearConfirm(true)}
                   disabled={isClearing || isSaving}
                   className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
                 >
@@ -502,7 +501,7 @@ export function PlaceholderForm({
               {hasValue ? (
                 <button
                   type="button"
-                  onClick={handleClearValue}
+                  onClick={() => setShowClearConfirm(true)}
                   disabled={isClearing || isSaving}
                   className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
                 >
@@ -565,7 +564,7 @@ export function PlaceholderForm({
                 <div className="flex items-center justify-between pt-1">
                   <button
                     type="button"
-                    onClick={handleClearValue}
+                    onClick={() => setShowClearConfirm(true)}
                     disabled={isClearing}
                     className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
                   >
@@ -607,6 +606,29 @@ export function PlaceholderForm({
           </div>
         )}
       </div>
+
+      {/* Clear Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showClearConfirm}
+        title="Clear Placeholder Content"
+        description={
+          <div>
+            <p>
+              Are you sure you want to reset and clear content for{' '}
+              <span className="font-semibold text-white">&ldquo;{placeholder.role}&rdquo;</span>?
+            </p>
+            <p className="mt-2 text-xs text-zinc-500">
+              The assigned value will be removed and reverted to default.
+            </p>
+          </div>
+        }
+        confirmText="Clear Content"
+        cancelText="Keep Content"
+        isDestructive={true}
+        isLoading={isClearing}
+        onConfirm={() => void executeClearValue()}
+        onClose={() => setShowClearConfirm(false)}
+      />
     </div>
   );
 }

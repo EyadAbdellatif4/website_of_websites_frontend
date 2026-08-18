@@ -125,11 +125,6 @@ export const designsApi = {
       method: 'DELETE',
     }),
 
-  getProcessingResult: (
-    id: string,
-  ): Promise<ApiResponse<ProcessingResponseData>> =>
-    apiClient<ProcessingResponseData>(`/designs/${id}/processing`),
-
   processDesign: (
     id: string,
   ): Promise<ApiResponse<ProcessingResponseData>> =>

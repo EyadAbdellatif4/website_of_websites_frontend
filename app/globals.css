@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #080d1a;
+  --foreground: #f1f5f9;
 }
 
 @theme inline {
@@ -12,15 +12,71 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: #080d1a;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Aurora Animation Keyframes */
+@keyframes aurora-slow {
+  0% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(60px, -40px) scale(1.15) rotate(15deg);
+  }
+  66% {
+    transform: translate(-40px, 50px) scale(0.95) rotate(-10deg);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes aurora-reverse {
+  0% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(-50px, 40px) scale(1.1) rotate(-15deg);
+  }
+  66% {
+    transform: translate(50px, -30px) scale(0.9) rotate(10deg);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+}
+
+.animate-aurora-slow {
+  animation: aurora-slow 18s ease-in-out infinite alternate;
+}
+
+.animate-aurora-reverse {
+  animation: aurora-reverse 22s ease-in-out infinite alternate;
+}
+
+.bg-radial-vignette {
+  background: radial-gradient(circle at center, transparent 40%, rgba(5, 8, 16, 0.85) 100%);
+}
+
+/* Glassmorphism scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 15, 30, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Navbar } from '@/src/components/ui/navbar';
+import { AnimatedBackground } from '@/src/components/ui/animated-background';
 import { AuthProvider } from '@/src/lib/auth/auth-context';
 import './globals.css';
 
@@ -32,11 +33,12 @@ export default function RootLayout({
     >
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 font-sans"
+        className="min-h-full flex flex-col bg-[#080d1a] text-slate-100 font-sans relative selection:bg-indigo-500 selection:text-white"
       >
         <AuthProvider>
+          <AnimatedBackground />
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 relative z-10">{children}</main>
         </AuthProvider>
       </body>
     </html>

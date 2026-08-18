@@ -6,6 +6,8 @@ export interface AuthResponseData {
   accessToken: string;
 }
 
+let currentUserPromise: Promise<ApiResponse<User>> | null = null;
+
 export const authApi = {
   register: (dto: { email: string; password: string }): Promise<ApiResponse<AuthResponseData>> =>
     apiClient<AuthResponseData>('/auth/register', {
@@ -19,11 +21,19 @@ export const authApi = {
       body: JSON.stringify(dto),
     }),
 
-  logout: (): Promise<ApiResponse<{ message: string }>> =>
-    apiClient<{ message: string }>('/auth/logout', {
+  logout: (): Promise<ApiResponse<{ message: string }>> => {
+    currentUserPromise = null;
+    return apiClient<{ message: string }>('/auth/logout', {
       method: 'POST',
-    }),
+    });
+  },
 
-  getCurrentUser: (): Promise<ApiResponse<User>> =>
-    apiClient<User>('/auth/me'),
+  getCurrentUser: (): Promise<ApiResponse<User>> => {
+    if (!currentUserPromise) {
+      currentUserPromise = apiClient<User>('/auth/me').finally(() => {
+        currentUserPromise = null;
+      });
+    }
+    return currentUserPromise;
+  },
 };
